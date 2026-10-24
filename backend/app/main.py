@@ -58,6 +58,11 @@ def _clean_line(line: str) -> str:
     line = re.sub(r"(?i)^\s*svg\s*$", "", line)
     line = re.sub(r"(?i)\bsvg\b", "", line)
     line = re.sub(r"(?i)\b(?:copy markdown|export \.md|export markdown)\b", "", line)
+    # Remove copied result-card headings and status text.
+    if line.strip().lower() in {"clear head, clear plan", "the short version", "next steps", "worth clarifying", "no explicit tasks found in these notes.", "no explicit tasks found in these notes", "none detected"}:
+        return ""
+    if re.match(r"(?i)^demo mode uses a deterministic organizer:", line.strip()):
+        return ""
     line = re.sub(r"\s+", " ", line).strip()
     line = re.sub(r"!?\[([^\]]*)\]\([^)]*\)", r"\1", line)
     line = re.sub(r"\[([^\]]+)\]\((https?://[^)]+)\)", r"\1 (\2)", line)
@@ -85,9 +90,21 @@ def _demo_response(notes: str) -> ProcessResponse:
         cleaned_lines.append(line)
 
     title = ""
-    if cleaned_lines and re.match(r"(?i)^(project\s+title|title|project name)\s*:", cleaned_lines[0]):
-        title = re.split(r":", cleaned_lines[0], maxsplit=1)[-1].strip()
-        cleaned_lines = cleaned_lines[1:]
+    title_pattern = re.compile(r"(?i)^(project\\s+titt?le|title|project name)\\s*:\\s*")
+    for index, line in enumerate(cleaned_lines):
+        match = title_pattern.match(line)
+        if not match:
+            continue
+        remainder = line[match.end():].strip()
+        # Clipboard extraction can join the title and description into one line.
+        split = re.search(r"(?i)\\s+(?:propertysetu\\s*[–-]\\s*)?project description\\b", remainder)
+        title = remainder[:split.start()].strip(" :–-") if split else remainder
+        if split:
+            cleaned_lines[index] = remainder[split.start():].strip(" :–-")
+        else:
+            cleaned_lines[index] = ""
+        cleaned_lines = [item for item in cleaned_lines if item]
+        break
 
     # In project descriptions, feature names like "Upload Documents" describe what
     # the software does, not work the user personally needs to do.
