@@ -52,8 +52,13 @@ def _extract_json_object(text: str) -> dict[str, Any]:
 def _clean_line(line: str) -> str:
     """Remove common copy/paste artifacts without rewriting the user's meaning."""
     line = unescape(line).replace("\u200b", "").replace("\ufeff", "")
+    # Clipboard text from icon buttons can concatenate the SVG tag name with labels,
+    # e.g. "svgVerify Account" or "svgCopy MarkdownsvgExport .md".
+    line = re.sub(r"(?i)svg(?=[A-Z])", " ", line)
     line = re.sub(r"(?i)^\s*svg\s*$", "", line)
     line = re.sub(r"(?i)\bsvg\b", "", line)
+    line = re.sub(r"(?i)\b(?:copy markdown|export \.md|export markdown)\b", "", line)
+    line = re.sub(r"\s+", " ", line).strip()
     line = re.sub(r"!?\[([^\]]*)\]\([^)]*\)", r"\1", line)
     line = re.sub(r"\[([^\]]+)\]\((https?://[^)]+)\)", r"\1 (\2)", line)
     line = re.sub(r"\*{1,3}([^*]+)\*{1,3}", r"\1", line)
@@ -84,11 +89,21 @@ def _demo_response(notes: str) -> ProcessResponse:
         title = re.split(r":", cleaned_lines[0], maxsplit=1)[-1].strip()
         cleaned_lines = cleaned_lines[1:]
 
+    # In project descriptions, feature names like "Upload Documents" describe what
+    # the software does, not work the user personally needs to do.
+    project_context = any(
+        re.search(r"(?i)project description|web-based .* system|main aim of the project", line)
+        for line in cleaned_lines
+    )
     task_start = re.compile(
         r"(?i)^(?:todo\b|to-do\b|need to\b|i need to\b|we need to\b|must\b|please\b|"
         r"finish\b|complete\b|send\b|review\b|run\b|check\b|verify\b|upload\b|submit\b|"
         r"follow up\b|make payment\b|track application\b|confirm\b|fix\b|test\b|"
         r"before release[, :]\s*(?:run|check|test|verify)\b)"
+    )
+    explicit_task_start = re.compile(
+        r"(?i)^(?:todo\b|to-do\b|need to\b|i need to\b|we need to\b|must\b|please\b|"
+        r"follow up\b|before release[, :]\s*(?:run|check|test|verify)\b)"
     )
     task_phrases = re.compile(
         r"(?i)\b(?:I need to|we need to|must|please)\s+(?:send|review|run|check|finish|complete|verify|upload|submit|fix|test|confirm|follow up)\b"
@@ -104,7 +119,7 @@ def _demo_response(notes: str) -> ProcessResponse:
             question = re.sub(r"(?i)^(?:open question|question|questions?)\s*:\s*", "", line).strip()
             if question and question not in questions:
                 questions.append(question)
-        elif task_start.match(line) or task_phrases.search(line):
+        elif (explicit_task_start.match(line) if project_context else task_start.match(line)) or task_phrases.search(line):
             if line not in tasks:
                 tasks.append(line)
         else:
