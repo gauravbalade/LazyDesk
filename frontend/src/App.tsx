@@ -20,7 +20,7 @@ const DEMO_NOTES = `Project sync — Friday
 - Follow up with the hosting provider about the environment variable issue.
 - Open question: do we need CSV export for the first release?`;
 
-const API_URL = (import.meta.env.VITE_API_URL ?? "https://lazydesk-api-final.onrender.com").replace(/\/$/, "");
+const API_URL = (import.meta.env.VITE_API_URL ?? "https://lazydesk-api-rootfix.onrender.com").replace(/\/$/, "");
 
 function App() {
   const [notes, setNotes] = useState(DEMO_NOTES);
