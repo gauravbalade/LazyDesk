@@ -97,7 +97,7 @@ def _demo_response(notes: str) -> ProcessResponse:
             continue
         remainder = line[match.end():].strip()
         # Clipboard extraction can join the title and description into one line.
-        split = re.search(r"(?i)\\s+(?:propertysetu\\s*[–-]\\s*)?project description\\b", remainder)
+        split = re.search(r"(?i)\\s*[–-]\\s*project description\\b|\\s+project description\\b", remainder)
         title = remainder[:split.start()].strip(" :–-") if split else remainder
         if split:
             cleaned_lines[index] = remainder[split.start():].strip(" :–-")
