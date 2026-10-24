@@ -63,3 +63,29 @@ svgCopy MarkdownsvgExport .md
     assert "Copy Markdown" not in combined
     assert "Export .md" not in combined
     assert not any(task.lower().startswith(("verify account", "upload documents")) for task in data["tasks"])
+
+    
+def test_demo_cleans_copied_result_chrome_and_recovers_misspelled_project_title():
+    notes = """Clear head, clear plan
+svg
+THE SHORT VERSION
+Project Tittle : PropertySetu – Project Description
+PropertySetu is a web-based property registration and document verification system.
+The main aim of the project is to provide applicants with a single platform.
+Next steps
+0
+No explicit tasks found in these notes.
+svgCopy MarkdownsvgExport .md
+svgDemo mode uses a deterministic organizer: notes are processed by this API without being sent to an AI model.
+"""
+    response = client.post("/api/process", json={"notes": notes})
+    assert response.status_code == 200
+    data = response.json()
+    combined = data["summary"] + " " + " ".join(data["tasks"]) + " " + " ".join(data["follow_up_questions"])
+    assert "svg" not in combined.lower()
+    assert "clear head, clear plan" not in combined.lower()
+    assert "the short version" not in combined.lower()
+    assert "no explicit tasks found" not in combined.lower()
+    assert "PropertySetu" in data["summary"]
+    assert "web-based property registration" in data["summary"]
+    assert not any("single platform" in task for task in data["tasks"])
