@@ -165,7 +165,7 @@ async def health() -> dict[str, Any]:
 async def process_notes(request: ProcessRequest) -> ProcessResponse:
     if DEMO_MODE:
         return _demo_response(request.notes)
-    prompt = f\"\"\"You are LazyDesk, a careful personal productivity assistant.
+    prompt = f"""You are LazyDesk, a careful personal productivity assistant.
 Organize the user's notes into a concise, useful result.
 Return ONLY valid JSON with keys summary (string), tasks (array of strings), follow_up_questions (array of strings).
 Rules:
