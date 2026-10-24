@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowDownToLine, ArrowRight, Check, CircleHelp, Clock3, FileText,
   LoaderCircle, LockKeyhole, RotateCcw, Sparkles, WandSparkles, Zap
@@ -20,7 +20,7 @@ const DEMO_NOTES = `Project sync — Friday
 - Follow up with the hosting provider about the environment variable issue.
 - Open question: do we need CSV export for the first release?`;
 
-const API_URL = (import.meta.env.VITE_API_URL ?? "http://127.0.0.1:8000").replace(/\/$/, "");
+const API_URL = (import.meta.env.VITE_API_URL ?? "https://lazydesk-api-s8tl.onrender.com").replace(/\/$/, "");
 
 function App() {
   const [notes, setNotes] = useState(DEMO_NOTES);
@@ -43,10 +43,9 @@ function App() {
     }
   }
 
-  useState(() => {
+  useEffect(() => {
     void checkHealth();
-    return undefined;
-  });
+  }, []);
 
   async function organizeNotes() {
     setError("");
