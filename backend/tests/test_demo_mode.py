@@ -44,3 +44,22 @@ Question: who approves an application?
     assert any("verify the uploaded documents" in task for task in data["tasks"])
     assert len(data["follow_up_questions"]) == 1
     assert "svg" not in data["summary"].lower()
+
+
+
+def test_demo_removes_concatenated_svg_labels_and_ui_controls():
+    notes = """Project Tittle : PropertySetu
+Project Description
+PropertySetu is a web-based property registration and document verification system.
+svgVerify Account – Complete the required email/mobile verification.
+svgUpload Documents – Upload required property documents.
+svgCopy MarkdownsvgExport .md
+"""
+    response = client.post("/api/process", json={"notes": notes})
+    assert response.status_code == 200
+    data = response.json()
+    combined = data["summary"] + " " + " ".join(data["tasks"]) + " " + " ".join(data["follow_up_questions"])
+    assert "svg" not in combined.lower()
+    assert "Copy Markdown" not in combined
+    assert "Export .md" not in combined
+    assert not any(task.lower().startswith(("verify account", "upload documents")) for task in data["tasks"])
