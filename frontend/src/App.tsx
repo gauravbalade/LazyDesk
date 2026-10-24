@@ -27,7 +27,7 @@ function App() {
   const [result, setResult] = useState<Result | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [apiState, setApiState] = useState<"checking" | "ready" | "offline">("checking");
+  const [apiState, setApiState] = useState<"checking" | "ready" | "demo" | "offline">("checking");
   const [copied, setCopied] = useState(false);
 
   const wordCount = useMemo(() => notes.trim() ? notes.trim().split(/\s+/).length : 0, [notes]);
@@ -37,7 +37,7 @@ function App() {
       const response = await fetch(`${API_URL}/api/health`);
       if (!response.ok) throw new Error("API unavailable");
       const data = await response.json();
-      setApiState(data.ollama_reachable && data.model_available ? "ready" : "offline");
+      setApiState(data.demo_mode ? "demo" : data.ollama_reachable && data.model_available ? "ready" : "offline");
     } catch {
       setApiState("offline");
     }
@@ -65,7 +65,7 @@ function App() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.detail || "Could not process these notes.");
       setResult(data);
-      setApiState("ready");
+      setApiState(typeof data.model === "string" && data.model.toLowerCase().includes("demo") ? "demo" : "ready");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong. Check the backend and local AI runtime.");
       setApiState("offline");
@@ -140,7 +140,7 @@ function App() {
             </div>
             <div className={`status-pill ${apiState === "ready" ? "status-ready" : "status-offline"}`}>
               <span className="status-dot" />
-              {apiState === "checking" ? "Checking local AI" : apiState === "ready" ? "Local AI ready" : "Local AI not ready"}
+              {apiState === "checking" ? "Checking AI" : apiState === "ready" ? "Local AI ready" : apiState === "demo" ? "Demo organizer" : "Local AI not ready"}
             </div>
           </div>
 
@@ -159,7 +159,7 @@ function App() {
               <button className="primary-button" onClick={organizeNotes} disabled={busy || notes.trim().length < 10}>
                 {busy ? <><LoaderCircle size={17} className="spin" /> Organizing notes…</> : <><WandSparkles size={17} /> Organize my notes <ArrowRight size={16} /></>}
               </button>
-              <p className="button-note"><Clock3 size={13} /> Runs on the local model configured on your machine.</p>
+              <p className="button-note"><Clock3 size={13} /> {apiState === "demo" ? "Hosted demo cleans and organizes notes without calling an AI model. Run locally with Ollama for open-weight AI." : "Runs on the local model configured on your machine."}</p>
               {error && <div className="error-message" role="alert"><CircleHelp size={16} /><span>{error}</span></div>}
             </section>
 
