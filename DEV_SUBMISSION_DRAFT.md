@@ -1,6 +1,6 @@
 # LazyDesk — Slow and Steady
 
-> Draft for the DEV Hacktoberfest Open-Source AI Challenge. Publish only after the public demo is verified and the local open-weight model path has been tested. Confirm the active challenge's deadline, tags and current rules before publishing.
+> Submission draft for the DEV Hacktoberfest Open-Source AI Challenge. The hosted demo runs in deterministic demo mode; the local Ollama open-weight model path should be demonstrated separately before claiming it in a submission. Confirm the active challenge's deadline, tags and current rules before publishing.
 
 ## The busywork
 
@@ -18,7 +18,7 @@ The hosted demonstration uses an explicitly labelled deterministic parser becaus
 
 ## How to try it
 
-- Live demo: [add verified URL]
+- Live demo: https://lazydesk-web-final.onrender.com
 - Source: https://github.com/gauravbalade/LazyDesk
 - Local setup: see README.md
 - API docs when running locally: http://127.0.0.1:8000/docs
