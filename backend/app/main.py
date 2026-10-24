@@ -76,7 +76,7 @@ def _demo_response(notes: str) -> ProcessResponse:
 
     for raw in notes.splitlines():
         line = _clean_line(raw)
-        if not line or line.lower() in {"copy markdown", "export .md", "export markdown"}:
+        if not line or line.lower() in {"copy markdown", "export .md", "export markdown", "clear head, clear plan", "the short version", "next steps", "worth clarifying"}:
             continue
         normalized = re.sub(r"[^a-z0-9]+", " ", line.lower()).strip()
         if normalized in seen:
