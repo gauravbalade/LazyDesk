@@ -90,14 +90,14 @@ def _demo_response(notes: str) -> ProcessResponse:
         cleaned_lines.append(line)
 
     title = ""
-    title_pattern = re.compile(r"(?i)^(project\\s+titt?le|title|project name)\\s*:\\s*")
+    title_pattern = re.compile(r"(?i)^(project\s+titt?le|title|project name)\s*:\s*")
     for index, line in enumerate(cleaned_lines):
         match = title_pattern.match(line)
         if not match:
             continue
         remainder = line[match.end():].strip()
         # Clipboard extraction can join the title and description into one line.
-        split = re.search(r"(?i)\\s*[–-]\\s*project description\\b|\\s+project description\\b", remainder)
+        split = re.search(r"(?i)\s*[–-]\s*project description\b|\s+project description\b", remainder)
         title = remainder[:split.start()].strip(" :–-") if split else remainder
         if split:
             cleaned_lines[index] = remainder[split.start():].strip(" :–-")
