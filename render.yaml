@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: lazydesk-api
+    runtime: docker
+    rootDir: backend
+    plan: free
+    region: singapore
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /
+    envVars:
+      - key: OLLAMA_BASE_URL
+        value: http://localhost:11434
+      - key: OLLAMA_MODEL
+        value: qwen2.5:3b
+      - key: LAZYDESK_CORS_ORIGINS
+        value: https://lazydesk-web.onrender.com,http://localhost:5173,http://127.0.0.1:5173
+  - type: web
+    name: lazydesk-web
+    runtime: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/dist
+    plan: free
+    region: singapore
+    envVars:
+      - key: VITE_API_URL
+        value: https://lazydesk-api.onrender.com
